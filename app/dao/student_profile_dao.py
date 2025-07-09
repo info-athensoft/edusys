@@ -1,5 +1,6 @@
 from app.dao.base_dao import BaseDAO
 from app.models.student_profile import StudentProfile
+from app.utils.db_utils import DBUtils
 from app.utils.student_utils import StudentUtils
 from app.enums.enrollment_status import EnrollmentStatus
 from app.enums.guardian_status import GuardianStatus
@@ -7,8 +8,8 @@ from app.enums.profile_status import ProfileStatus
 
 class StudentProfileDAO(BaseDAO):
 
-    def __init__(self, connection=None):
-        super().__init__("student_profile", connection)
+    def __init__(self):
+        super().__init__("student_profile")
 
     def get_student_by_id(self, student_id: int) -> StudentProfile | None:
         result = self.get_rows_by_column_value(student_id, "student_id")
@@ -46,27 +47,27 @@ class StudentProfileDAO(BaseDAO):
             student_profile.get_guardian_status().value,
             student_profile.get_profile_status().value
         )
-        conn = None
+        connection = None
         cursor = None
         try:
-            conn = self.get_connection()
-            cursor = conn.cursor()
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor()
             cursor.execute(query, values)
-            conn.commit()
+            connection.commit()
             return cursor.lastrowid
         finally:
             if cursor:
                 cursor.close()
-            if conn:
-                conn.close()
+            if connection:
+                connection.close()
 
     def read_student_profiles(self, filter_column=None, filter_value=None):
-        conn = None
+        query = "SELECT * FROM student_profile"
+        connection = None
         cursor = None
         try:
-            query = "SELECT * FROM student_profile"
-            conn = self.get_connection()
-            cursor = conn.cursor(dictionary=True)
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor(dictionary=True)
             cursor.execute(query)
             students = cursor.fetchall()
 
@@ -90,8 +91,8 @@ class StudentProfileDAO(BaseDAO):
         finally:
             if cursor:
                 cursor.close()
-            if conn:
-                conn.close()
+            if connection:
+                connection.close()
 
     def update_student_profile(self, student_profile: StudentProfile):
         query = """
@@ -123,20 +124,20 @@ class StudentProfileDAO(BaseDAO):
             student_profile.get_profile_status().value,
             student_profile.get_student_id()
         )
-        conn = None
+        connection = None
         cursor = None
         try:
-            conn = self.get_connection()
-            cursor = conn.cursor()
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor(dictionary=True)
             cursor.execute(query, values)
-            conn.commit()
+            connection.commit()
             if cursor.rowcount == 0:
                 raise ValueError(f"Student ID {student_profile.get_student_id()} does not exist in the database.")
         finally:
             if cursor:
                 cursor.close()
-            if conn:
-                conn.close()
+            if connection:
+                connection.close()
 
     @staticmethod
     def build_entity_object(row: dict) -> StudentProfile:

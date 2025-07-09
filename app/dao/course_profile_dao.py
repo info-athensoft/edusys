@@ -2,12 +2,12 @@ from app.dao.base_dao import BaseDAO
 from app.models.course_profile import CourseProfile
 from app.enums.audience_type import AudienceType
 from app.enums.profile_status import ProfileStatus
-
+from app.utils.db_utils import DBUtils
 
 class CourseProfileDAO(BaseDAO):
 
-    def __init__(self, connection=None):
-        super().__init__("course_profile", connection)
+    def __init__(self):
+        super().__init__("course_profile")
 
     def get_course_by_id(self, course_id: int) -> CourseProfile | None:
         try:
@@ -55,13 +55,13 @@ class CourseProfileDAO(BaseDAO):
             course_profile.get_profile_status().value
         )
 
-        conn = None
+        connection = None
         cursor = None
         try:
-            conn = self.get_connection()
-            cursor = conn.cursor()
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor(dictionary=True)
             cursor.execute(query, values)
-            conn.commit()
+            connection.commit()
             return cursor.lastrowid
         except Exception as e:
             print(f"Error creating course profile: {e}")
@@ -69,15 +69,15 @@ class CourseProfileDAO(BaseDAO):
         finally:
             if cursor:
                 cursor.close()
-            if conn:
-                conn.close()
+            if connection:
+                connection.close()
 
     def read_course_profiles(self, filter_column=None, filter_value=None):
-        conn = None
+        connection = None
         cursor = None
         try:
-            conn = self.get_connection()
-            cursor = conn.cursor(dictionary=True)
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT * FROM course_profile")
             courses = cursor.fetchall()
 
@@ -98,8 +98,8 @@ class CourseProfileDAO(BaseDAO):
         finally:
             if cursor:
                 cursor.close()
-            if conn:
-                conn.close()
+            if connection:
+                connection.close()
 
     def update_course_profile(self, course_profile: CourseProfile):
         query = """
@@ -124,13 +124,13 @@ class CourseProfileDAO(BaseDAO):
             course_profile.get_course_id()
         )
 
-        conn = None
+        connection = None
         cursor = None
         try:
-            conn = self.get_connection()
-            cursor = conn.cursor()
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor()
             cursor.execute(query, values)
-            conn.commit()
+            connection.commit()
             if cursor.rowcount == 0:
                 raise ValueError(f"Course ID {course_profile.get_course_id()} does not exist in the database.")
         except Exception as e:
@@ -139,19 +139,18 @@ class CourseProfileDAO(BaseDAO):
         finally:
             if cursor:
                 cursor.close()
-            if conn:
-                conn.close()
+            if connection:
+                connection.close()
 
     def delete_course_profile(self, course_id: int):
         query = "DELETE FROM course_profile WHERE course_id = %s"
-        conn = None
+        connection = None
         cursor = None
-
         try:
-            conn = self.get_connection()
-            cursor = conn.cursor()
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor()
             cursor.execute(query, (course_id,))
-            conn.commit()
+            connection.commit()
             if cursor.rowcount == 0:
                 raise ValueError(f"Course ID {course_id} does not exist in the database.")
         except Exception as e:
@@ -160,8 +159,8 @@ class CourseProfileDAO(BaseDAO):
         finally:
             if cursor:
                 cursor.close()
-            if conn:
-                conn.close()
+            if connection:
+                connection.close()
 
     @staticmethod
     def build_entity_object(row: dict) -> CourseProfile:

@@ -1,12 +1,13 @@
 from app.dao.base_dao import BaseDAO
 from app.models.student_enrollment_details import StudentEnrollmentDetails
 from app.enums.class_enrollment_status import ClassEnrollmentStatus
+from app.utils.db_utils import DBUtils
 
 
 class StudentEnrollmentDetailsDAO(BaseDAO):
 
-    def __init__(self, connection=None):
-        super().__init__("student_enrollment_details", connection)
+    def __init__(self):
+        super().__init__("student_enrollment_details")
 
     def get_enrollment_by_id(self, enrollment_id: int) -> StudentEnrollmentDetails | None:
         result = self.get_rows_by_column_value(enrollment_id, "enrollment_id")
@@ -26,11 +27,22 @@ class StudentEnrollmentDetailsDAO(BaseDAO):
             enrollment.get_enrollment_date(),
             enrollment.get_enrollment_status().value,
         )
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, values)
-        conn.commit()
-        return cursor.lastrowid
+        connection = None
+        cursor = None
+        try:
+            connection = DBUtils().get_connection()
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(query, values)
+            connection.commit()
+            return cursor.lastrowid
+        except Exception as e:
+            print(f"Error creating course profile: {e}")
+            raise
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
 
     def read_enrollments(self, filter_column=None, filter_value=None):
         try:

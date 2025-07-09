@@ -1,14 +1,10 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from app.utils.db_utils import DBUtils
 
-class BaseDAO(object):
+class BaseDAO(ABC):
 
-    def __init__(self, table_name: str, connection=None):
-        self._connection = connection or DBUtils().get_connection()
+    def __init__(self, table_name: str):
         self._table_name = table_name
-
-    def get_connection(self):
-        return self._connection
 
     def count_rows(self):
         connection = None
@@ -29,7 +25,7 @@ class BaseDAO(object):
         cursor = None
         try:
             connection = DBUtils().get_connection()
-            cursor = connection.cursor(dictionary=True)
+            cursor = connection.cursor()
             cursor.execute(f"SELECT * FROM {self._table_name}")
             return cursor.fetchall()
         finally:

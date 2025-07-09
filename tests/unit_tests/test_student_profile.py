@@ -7,9 +7,9 @@ from app.dao.student_profile_dao import StudentProfileDAO
 from mysql.connector.errors import IntegrityError, DataError
 
 
-def test_course_profile_count(db_connection):
+def test_student_profile_count():
     """Test that the number of course profiles in initial table is exactly 3"""
-    dao = StudentProfileDAO(db_connection)
+    dao = StudentProfileDAO()
     count = dao.count_rows()
     assert count == 3
 #

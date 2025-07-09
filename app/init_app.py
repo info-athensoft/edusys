@@ -293,8 +293,7 @@ add_initial_scheduled_class_sessions()
 
 # TODO for testing purposes
 def enroll_students_in_classes_initial():
-    connection = get_connection()
-    dao = StudentEnrollmentDetailsDAO(connection)
+    dao = StudentEnrollmentDetailsDAO()
     dao.create_enrollment(StudentEnrollmentDetails(0, 2025050001, 1, "2025-05-03", ClassEnrollmentStatus.ACTIVE))
     dao.create_enrollment(StudentEnrollmentDetails(0, 2025050001, 2, "2025-05-03", ClassEnrollmentStatus.ACTIVE))
     dao.create_enrollment(StudentEnrollmentDetails(0, 2025050001, 3, "2025-05-03", ClassEnrollmentStatus.ACTIVE))

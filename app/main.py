@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
+# from app.init_app import init_app
 import os
 from datetime import datetime
 
@@ -81,6 +82,8 @@ template_dir = os.path.join(basedir, 'templates')
 # Initialize Flask app
 app = Flask(__name__, template_folder=template_dir)
 app.secret_key = os.getenv("SECRET_KEY", "dev")
+# init_app(app)
+
 
 # DB_NAME = os.getenv("DB_NAME", "education_management_test")
 #
